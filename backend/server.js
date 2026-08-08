@@ -19,8 +19,8 @@ const wss    = new WebSocketServer({ server });
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
-const frontendPath = path.join(__dirname, '..', 'frontend');
+// Serve root static files (index.html, css/, js/, assets/)
+const frontendPath = path.join(__dirname, '..');
 app.use(express.static(frontendPath));
 
 // ─── WebSocket Clients ─────────────────────────────────────────────────────────
