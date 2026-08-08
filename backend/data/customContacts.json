@@ -1,0 +1,18 @@
+{
+  "contacts": [
+    {
+      "id": "c_1786208856384",
+      "name": "WARDEN MARAN",
+      "phone": "7708128935",
+      "role": "custom_contact",
+      "addedAt": "2026-08-08T17:07:36.384Z"
+    },
+    {
+      "id": "c_1786208950027",
+      "name": "DR shaki",
+      "phone": "6385710907",
+      "role": "custom_contact",
+      "addedAt": "2026-08-08T17:09:10.027Z"
+    }
+  ]
+}

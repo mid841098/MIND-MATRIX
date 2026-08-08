@@ -1,0 +1,61 @@
+{
+  "vehicles": [
+    {
+      "id": "v1",
+      "name": "Campus Ambulance",
+      "type": "ambulance",
+      "registration": "VU-AMB-001",
+      "capacity": 2,
+      "driver": "Ram Prasad",
+      "driverPhone": "+91-9876550001",
+      "location": "Vehicle Bay",
+      "status": "available",
+      "eta": 4,
+      "equipped": ["First Aid Kit", "Oxygen Cylinder", "Stretcher", "Defibrillator"]
+    },
+    {
+      "id": "v2",
+      "name": "Golf Cart Alpha",
+      "type": "golf_cart",
+      "registration": "VU-GC-001",
+      "capacity": 4,
+      "driver": "Suresh",
+      "driverPhone": "+91-9876550002",
+      "location": "Gate 1",
+      "status": "available",
+      "eta": 2,
+      "equipped": ["Basic First Aid"]
+    },
+    {
+      "id": "v3",
+      "name": "Golf Cart Beta",
+      "type": "golf_cart",
+      "registration": "VU-GC-002",
+      "capacity": 4,
+      "driver": "Mahesh",
+      "driverPhone": "+91-9876550003",
+      "location": "Security HQ",
+      "status": "in_use",
+      "eta": 7,
+      "equipped": ["Basic First Aid"]
+    },
+    {
+      "id": "v4",
+      "name": "Emergency Van",
+      "type": "van",
+      "registration": "VU-VAN-001",
+      "capacity": 8,
+      "driver": "Dinesh Kumar",
+      "driverPhone": "+91-9876550004",
+      "location": "Admin Parking",
+      "status": "available",
+      "eta": 6,
+      "equipped": ["First Aid Kit", "Fire Extinguisher"]
+    }
+  ],
+  "externalAmbulance": {
+    "provider": "City Emergency Services",
+    "phone": "108",
+    "averageEta": 15
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "campus": "Verity University Campus",
+  "blocks": [
+    { "id": "block-a", "name": "Block A", "type": "hostel", "label": "Hostel Block A", "x": 120, "y": 80, "width": 100, "height": 70, "nearestGate": "Gate 1", "floor": 5 },
+    { "id": "block-b", "name": "Block B", "type": "hostel", "label": "Hostel Block B", "x": 260, "y": 80, "width": 100, "height": 70, "nearestGate": "Gate 1", "floor": 5 },
+    { "id": "block-c", "name": "Block C", "type": "hostel", "label": "Hostel Block C", "x": 400, "y": 80, "width": 100, "height": 70, "nearestGate": "Gate 2", "floor": 4 },
+    { "id": "block-d", "name": "Block D", "type": "hostel", "label": "Hostel Block D", "x": 540, "y": 80, "width": 100, "height": 70, "nearestGate": "Gate 2", "floor": 4 },
+    { "id": "medical", "name": "Medical Center", "type": "medical", "label": "Campus Medical", "x": 120, "y": 230, "width": 110, "height": 70, "nearestGate": "Gate 1", "floor": 1 },
+    { "id": "security", "name": "Security HQ", "type": "security", "label": "Security HQ", "x": 260, "y": 230, "width": 100, "height": 70, "nearestGate": "Gate 1", "floor": 1 },
+    { "id": "admin", "name": "Admin Block", "type": "admin", "label": "Administration", "x": 400, "y": 230, "width": 110, "height": 70, "nearestGate": "Gate 2", "floor": 3 },
+    { "id": "cafeteria", "name": "Cafeteria", "type": "amenity", "label": "Cafeteria", "x": 540, "y": 230, "width": 100, "height": 70, "nearestGate": "Gate 2", "floor": 1 },
+    { "id": "library", "name": "Library", "type": "academic", "label": "Library", "x": 180, "y": 370, "width": 110, "height": 70, "nearestGate": "Gate 3", "floor": 2 },
+    { "id": "lab", "name": "Labs", "type": "academic", "label": "Science Labs", "x": 360, "y": 370, "width": 110, "height": 70, "nearestGate": "Gate 3", "floor": 2 },
+    { "id": "sports", "name": "Sports Complex", "type": "amenity", "label": "Sports Complex", "x": 510, "y": 370, "width": 130, "height": 70, "nearestGate": "Gate 3", "floor": 1 }
+  ],
+  "gates": [
+    { "id": "gate-1", "name": "Gate 1", "x": 55, "y": 155, "type": "main" },
+    { "id": "gate-2", "name": "Gate 2", "x": 690, "y": 155, "type": "side" },
+    { "id": "gate-3", "name": "Gate 3", "x": 370, "y": 490, "type": "rear" }
+  ],
+  "vehicleParking": { "x": 300, "y": 155, "label": "Vehicle Bay" },
+  "locationAliases": {
+    "hostel": ["block-a", "block-b", "block-c", "block-d"],
+    "boys hostel": ["block-a", "block-b"],
+    "girls hostel": ["block-c", "block-d"],
+    "hospital": ["medical"],
+    "clinic": ["medical"],
+    "office": ["admin"],
+    "ground": ["sports"],
+    "canteen": ["cafeteria"]
+  }
+}
