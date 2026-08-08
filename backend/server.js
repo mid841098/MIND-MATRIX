@@ -296,7 +296,7 @@ app.get('*', (req, res) => {
 
 // ─── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🚨 ═══════════════════════════════════════════════════');
   console.log('🚨  CAMPUS SOS — Emergency Coordination System');
