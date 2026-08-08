@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus SOS — AI Emergency Coordination System</title>
+  <meta name="description" content="Autonomous AI-powered campus emergency coordination system. Report emergencies, dispatch security, medical, and communication agents in real-time." />
+  <meta name="theme-color" content="#cc0000" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Background decorations -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-radial" aria-hidden="true"></div>
+
+  <div id="app">
+
+    <!-- ═══════════════════ HEADER ═══════════════════ -->
+    <header class="header" role="banner">
+      <div class="header-brand">
+        <img src="assets/logo.png" alt="TEAM MIND MATRIXX Logo" class="header-logo-img" />
+        <div class="header-title-box">
+          <div class="header-team-tag">TEAM MIND MATRIXX</div>
+          <div class="header-title">CAMPUS SOS</div>
+          <div class="header-subtitle">CODE • INNOVATE • ELEVATE</div>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="hud-pill" title="Telemetry Coordinates">
+          <span>📡 12.97°N 77.59°E</span>
+        </div>
+        <div id="connection-badge" class="connection-badge connected hud-pill" role="status" aria-live="polite">
+          <div class="connection-dot"></div>
+          <span>NEURAL: CONNECTED</span>
+        </div>
+        <div id="wa-badge" class="wa-badge hud-pill" title="WhatsApp Telemetry Link">
+          <span id="wa-badge-icon">📱</span>
+          <span id="wa-badge-text">WA: INIT</span>
+        </div>
+        <button id="open-contacts-btn" class="quick-btn hud-pill" style="border-color:var(--hud-cyan); color:var(--hud-cyan); cursor:pointer;" title="Manage WhatsApp emergency contacts">
+          📞 CONTACT MATRIX
+        </button>
+        <div class="incident-counter hud-pill" id="incident-counter" aria-live="polite">INCIDENTS: 0</div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <main class="main-grid" role="main">
+
+      <!-- ──────────── LEFT: Chat Panel ──────────── -->
+      <section class="panel" aria-label="Emergency Chat">
+        <div class="panel-header">
+          <span class="panel-title">⚡ Emergency Command Console</span>
+          <span class="panel-badge" id="chat-badge">NEURAL DISPATCH</span>
+        </div>
+
+        <div class="panel-body" id="chat-panel-body">
+          <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
+            <!-- Messages injected by JS -->
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <div class="emergency-input-wrapper">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="emergency-label" for="emergency-input">INPUT EMERGENCY TELEMETRY</label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label for="block-select" style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Target Node:</label>
+                <select id="block-select" class="quick-btn" style="background:rgba(4,8,16,0.9); color:var(--hud-cyan); border-color:var(--hud-cyan); font-weight:600; padding:3px 8px; cursor:pointer;">
+                  <option value="auto">🤖 Auto-Detect Node</option>
+                  <option value="block-a">🏢 Block A (Hostel Node)</option>
+                  <option value="block-b">🏢 Block B (Hostel Node)</option>
+                  <option value="block-c">🏢 Block C (Hostel Node)</option>
+                  <option value="block-d">🏢 Block D (Hostel Node)</option>
+                  <option value="medical">🏥 Medical Center Node</option>
+                  <option value="security">🔒 Security HQ Node</option>
+                  <option value="admin">🏛️ Admin Node</option>
+                  <option value="cafeteria">☕ Cafeteria Node</option>
+                  <option value="library">📚 Library Node</option>
+                  <option value="lab">🔬 Science Labs Node</option>
+                  <option value="sports">⚽ Sports Complex Node</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quick scenario buttons -->
+            <div class="quick-buttons" role="group" aria-label="Quick scenarios">
+              <button class="quick-btn" data-text="My roommate collapsed in Block C, he's unconscious and not responding." id="quick-btn-1">⚡ Collapsed</button>
+              <button class="quick-btn" data-text="There's a fire in Block A hostel, smoke coming from 3rd floor!" id="quick-btn-2">🔥 Fire Threat</button>
+              <button class="quick-btn" data-text="My friend fell from the stairs near Block B and has a severe leg injury." id="quick-btn-3">🤕 Trauma</button>
+              <button class="quick-btn" data-text="There's a fight happening near the cafeteria, two students are involved." id="quick-btn-4">⚠️ Security Breach</button>
+              <button class="quick-btn" data-text="My friend is having a severe mental breakdown in the library, she needs immediate help." id="quick-btn-5">🧠 Crisis</button>
+            </div>
+
+            <textarea
+              id="emergency-input"
+              class="emergency-textarea"
+              placeholder="Describe emergency situation... e.g. 'My roommate collapsed in Block C'"
+              rows="3"
+              maxlength="500"
+              aria-label="Emergency description"
+            ></textarea>
+
+            <div class="send-row">
+              <button id="send-sos" class="sos-button" aria-label="Dispatch Emergency Agent Matrix">
+                ⚡ DISPATCH NEURAL AGENTS
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ──────────── CENTER: Map Panel ──────────── -->
+      <section class="panel center-panel" aria-label="Campus Map">
+        <div class="panel-header">
+          <span class="panel-title">🌐 TACTICAL TELEMETRY MAP</span>
+          <span class="panel-badge">REALTIME SATELLITE FEED</span>
+        </div>
+
+        <div class="map-container">
+          <!-- Incident info card (shown on incident) -->
+          <div class="map-incident-card" id="map-incident-card" role="status" aria-live="polite">
+            <div class="incident-card-header">
+              <span class="incident-id-tag" id="incident-id-tag">NO INCIDENT</span>
+              <span class="severity-badge" id="severity-badge">—</span>
+              <span style="font-size:12px; color:var(--text-secondary); flex:1" id="incident-type-text">Standby</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px">
+              📍 <strong id="incident-location-text" style="color:var(--text-secondary)">—</strong>
+            </div>
+            <div class="incident-stats">
+              <div class="incident-stat">
+                <span class="incident-stat-value" id="stat-distance">—</span>
+                <span class="incident-stat-label">To Medical</span>
+              </div>
+              <div class="incident-stat">
+                <span class="incident-stat-value" id="stat-eta">—</span>
+                <span class="incident-stat-label">Medical ETA</span>
+              </div>
+              <div class="incident-stat">
+                <span class="incident-stat-value" id="stat-gate">—</span>
+                <span class="incident-stat-label">Access Gate</span>
+              </div>
+            </div>
+            <div style="margin-top:8px; border-top:1px solid var(--glass-border); padding-top:8px;">
+              <span class="incident-stat-label">Vehicle: </span>
+              <span style="font-size:12px; color:var(--red-300); font-weight:600;" id="stat-vehicle">Pending</span>
+            </div>
+          </div>
+
+          <!-- Campus SVG Map -->
+          <svg id="campus-svg" role="img" aria-label="Campus map showing blocks, gates, and emergency routes">
+            <title>Verity University Campus Map</title>
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-legend" role="note" aria-label="Map legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#660000;"></div>
+            <span>Hostel Blocks</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#006633;"></div>
+            <span>Medical Center</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#003366;"></div>
+            <span>Security HQ</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#cc0000; border-radius:50%;"></div>
+            <span>Incident Location</span>
+          </div>
+          <div class="legend-item">
+            <div style="width:20px; height:2px; background:#cc0000; border-top:2px dashed #cc0000;"></div>
+            <span>Response Route</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ──────────── RIGHT: Agents + Timeline ──────────── -->
+      <section class="panel" aria-label="Agent Status and Timeline">
+
+        <!-- Agents sub-panel -->
+        <div class="panel-header">
+          <span class="panel-title">Agent Network</span>
+          <span class="panel-badge" id="agents-badge">5 AGENTS</span>
+        </div>
+
+        <div style="flex: 0 0 auto; overflow-y: auto; max-height: 52vh; padding: 12px 16px; border-bottom: 1px solid var(--glass-border);">
+          <div class="agents-list" id="agents-list" role="list" aria-label="Emergency response agents">
+            <!-- Agent cards injected by JS -->
+          </div>
+        </div>
+
+        <!-- Timeline sub-panel -->
+        <div class="panel-header" style="border-top: 1px solid var(--glass-border);">
+          <span class="panel-title">Incident Timeline</span>
+          <button class="panel-badge" id="clear-timeline" style="cursor:pointer; background:transparent; border:1px solid var(--glass-border); color:var(--text-muted); padding: 2px 8px; border-radius: 99px; font-size:10px;" aria-label="Clear timeline">CLEAR</button>
+        </div>
+
+        <div class="panel-body">
+          <div class="timeline" id="timeline-list" role="log" aria-live="polite" aria-label="Incident timeline">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-text">Timeline will appear here when an emergency is reported</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ═══════════════════ STATUS BAR ═══════════════════ -->
+    <footer class="status-bar" role="contentinfo">
+      <div class="status-item">🖥️ <strong>Campus SOS v1.0</strong></div>
+      <div class="status-item">🤖 <strong id="status-gemini">Initializing...</strong></div>
+      <div class="status-item">📱 <strong id="status-whatsapp">WhatsApp: Starting...</strong></div>
+      <div class="status-item">🕐 <strong id="status-time"></strong></div>
+      <div class="status-item" style="margin-left:auto; color:var(--text-purple); font-weight:700;">⚡ TEAM MIND MATRIXX</div>
+    </footer>
+
+  </div><!-- /#app -->
+
+  <!-- ═══════════════════ CONTACTS MANAGEMENT MODAL ═══════════════════ -->
+  <div class="modal-overlay hidden" id="contacts-overlay" role="dialog" aria-modal="true" aria-labelledby="contacts-modal-title">
+    <div class="supervisor-modal" style="max-width:480px;">
+      <div class="modal-icon">📞</div>
+      <h2 class="modal-title" id="contacts-modal-title">Emergency WhatsApp Contacts</h2>
+      <p class="modal-subtitle">Add numbers to receive automated WhatsApp emergency alerts</p>
+
+      <div style="margin-bottom: 16px; background: rgba(30,0,0,0.6); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+        <div style="font-size:11px; font-weight:700; color:var(--text-red); margin-bottom:8px; text-transform:uppercase;">Add New Recipient</div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" id="new-contact-name" placeholder="Name (e.g. Warden Dave)" class="emergency-textarea" style="min-height:36px; padding:6px 10px;" />
+          <input type="tel" id="new-contact-phone" placeholder="Phone (e.g. 9876543210)" class="emergency-textarea" style="min-height:36px; padding:6px 10px;" />
+        </div>
+        <button id="add-contact-btn" class="sos-button" style="padding:8px 12px; font-size:12px;">➕ Add Contact</button>
+      </div>
+
+      <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase;">Active Contact Directory</div>
+      <div id="custom-contacts-list" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;" class="thin-scroll">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div style="margin-top:20px; text-align:right;">
+        <button class="modal-btn reject" id="close-contacts-btn" style="display:inline-block; width:auto; padding:8px 16px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WHATSAPP QR MODAL ═══════════════════ -->
+  <div class="modal-overlay hidden" id="wa-qr-overlay" role="dialog" aria-modal="true" aria-labelledby="wa-modal-title">
+    <div class="supervisor-modal" style="max-width:400px; text-align:center;">
+      <div class="modal-icon">📱</div>
+      <h2 class="modal-title" id="wa-modal-title">Scan WhatsApp QR</h2>
+      <p class="modal-subtitle">Open WhatsApp → Linked Devices → Link a Device</p>
+      <div style="background:#fff; border-radius:12px; padding:12px; display:inline-block; margin:16px auto;">
+        <img id="wa-qr-image" src="" alt="WhatsApp QR Code" width="200" height="200" style="display:block;"/>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">Scan once — session is saved permanently.</p>
+      <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">This modal will close automatically when connected.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SUPERVISOR MODAL ═══════════════════ -->
+  <div class="modal-overlay hidden" id="supervisor-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="supervisor-modal">
+      <div class="modal-icon" aria-hidden="true">🔐</div>
+      <h2 class="modal-title" id="modal-title">Human Supervisor Required</h2>
+      <p class="modal-subtitle">HIGH-RISK ACTION — APPROVAL NEEDED</p>
+
+      <div class="modal-action-box">
+        <div class="modal-action-type" id="modal-action-type">ACTION TYPE</div>
+        <div class="modal-action-desc" id="modal-action-desc">Action description</div>
+        <div class="modal-action-detail" id="modal-action-detail">Details</div>
+        <span class="modal-risk-badge HIGH" id="modal-risk-badge">Risk Level</span>
+      </div>
+
+      <div class="countdown-ring">
+        <div class="countdown-circle" role="timer" aria-label="Approval countdown">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <circle class="countdown-track" cx="26" cy="26" r="22"/>
+            <circle class="countdown-progress" id="countdown-progress" cx="26" cy="26" r="22"
+              stroke-dasharray="138.2" stroke-dashoffset="0"/>
+          </svg>
+          <div class="countdown-number" id="countdown-number" aria-live="polite">30</div>
+        </div>
+        <div class="countdown-label" id="countdown-label">
+          <strong>Human approval required</strong>
+          Auto-approves in 30s if no response
+        </div>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="modal-btn reject" id="btn-reject" aria-label="Reject this action">
+          ❌ Reject
+        </button>
+        <button class="modal-btn approve" id="btn-approve" aria-label="Approve this action">
+          ✅ Approve
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/map.js"></script>
+  <script src="js/agentPanel.js"></script>
+  <script src="js/supervisor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

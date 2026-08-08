@@ -19,9 +19,11 @@ const wss    = new WebSocketServer({ server });
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
+// Serve frontend static files
+const rootPath     = path.join(__dirname, '..');
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
+app.use(express.static(rootPath));
 
 // ─── WebSocket Clients ─────────────────────────────────────────────────────────
 const clients = new Set();
@@ -290,8 +292,15 @@ app.get('/api/whatsapp/status', (req, res) => {
 });
 
 // SPA fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  const fs = require('fs');
+  const indexInFrontend = path.join(frontendPath, 'index.html');
+  const indexInRoot     = path.join(rootPath, 'index.html');
+  if (fs.existsSync(indexInFrontend)) {
+    return res.sendFile(indexInFrontend);
+  }
+  return res.sendFile(indexInRoot);
 });
 
 // ─── Start ─────────────────────────────────────────────────────────────────────
