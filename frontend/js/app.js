@@ -528,14 +528,19 @@ const App = (() => {
     const addContactBtn = document.getElementById('add-contact-btn');
     const contactsOverlay = document.getElementById('contacts-overlay');
 
+    let localCustomContacts = [];
+
     if (openContactsBtn) {
       openContactsBtn.onclick = () => {
+        renderCustomContacts(localCustomContacts);
+        if (contactsOverlay) contactsOverlay.classList.remove('hidden');
         sendWS({ type: 'get_custom_contacts' });
-        contactsOverlay?.classList.remove('hidden');
       };
     }
     if (closeContactsBtn) {
-      closeContactsBtn.onclick = () => contactsOverlay?.classList.add('hidden');
+      closeContactsBtn.onclick = () => {
+        if (contactsOverlay) contactsOverlay.classList.add('hidden');
+      };
     }
     if (addContactBtn) {
       addContactBtn.onclick = () => {
@@ -548,6 +553,10 @@ const App = (() => {
           alert('Please enter a valid phone number (at least 10 digits)');
           return;
         }
+
+        const newC = { id: `c_${Date.now()}`, name: name || 'Emergency Contact', phone };
+        localCustomContacts.push(newC);
+        renderCustomContacts(localCustomContacts);
 
         sendWS({
           type: 'add_custom_contact',
