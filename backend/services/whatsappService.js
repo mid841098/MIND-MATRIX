@@ -15,9 +15,11 @@ let broadcastFn = null;
 const messageQueue = [];
 
 function toChatId(phone) {
-  const digits = phone.toString().replace(/[^\d]/g, '');
-  const withCC = digits.startsWith('91') ? digits : `91${digits}`;
-  return `${withCC}@c.us`;
+  let digits = phone.toString().replace(/[^\d]/g, '');
+  if (digits.length > 10) {
+    digits = digits.slice(-10);
+  }
+  return `91${digits}@c.us`;
 }
 
 // ─── Poll for ready state after authentication ─────────────────────────────
