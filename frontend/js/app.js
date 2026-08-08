@@ -102,8 +102,24 @@ const App = (() => {
   let isProcessing = false;
   let pendingApprovals = {};
 
-  const WS_URL = `ws://${window.location.host}`;
-  const CAMPUS_API = '/api/campus-map';
+  const WS_URL = `  // ─── WS / REST API Config ──────────────────────────────────────────────────
+  const isHttps = window.location.protocol === 'https:';
+  const wsProtocol = isHttps ? 'wss:' : 'ws:';
+
+  // Get backend URL from query param ?backend=https://... or fallback to relative
+  const urlParams = new URLSearchParams(window.location.search);
+  const customBackend = urlParams.get('backend');
+
+  let WS_URL = customBackend
+    ? customBackend.replace('http:', 'ws:').replace('https:', 'wss:')
+    : `${wsProtocol}//${window.location.host}`;
+
+  let API_BASE = customBackend ? customBackend.replace(/\/$/, '') : '';
+  const CAMPUS_API = `${API_BASE}/api/campus-map`;
+
+  let useRestFallback = false;
+  let wsRetryCount = 0;
+  let restPollInterval = null;
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   async function init() {
@@ -122,7 +138,7 @@ const App = (() => {
     // Setup supervisor modal
     SupervisorModal.setupListeners();
 
-    // Connect WebSocket
+    // Connect WebSocket (with REST fallback)
     connectWebSocket();
 
     // Setup UI events
@@ -132,7 +148,7 @@ const App = (() => {
     addChatMessage('system', '🔴 Campus SOS Network Online. How can we help? Describe your emergency below.');
   }
 
-  // ─── WebSocket ─────────────────────────────────────────────────────────────
+  // ─── WebSocket & REST Fallback ─────────────────────────────────────────────
   function connectWebSocket() {
     updateConnectionStatus('connecting');
 
@@ -141,20 +157,29 @@ const App = (() => {
 
       ws.onopen = () => {
         connected = true;
+        useRestFallback = false;
+        wsRetryCount = 0;
         updateConnectionStatus('connected');
         console.log('✅ WS Connected');
       };
 
       ws.onclose = () => {
         connected = false;
-        updateConnectionStatus('disconnected');
-        addChatMessage('system', '⚠️ Connection lost. Attempting to reconnect...');
-        setTimeout(connectWebSocket, 3000);
+        wsRetryCount++;
+        if (wsRetryCount > 2) {
+          enableRestFallback('WebSocket unsupported on server — switched to HTTP REST Mode');
+        } else {
+          updateConnectionStatus('disconnected');
+          setTimeout(connectWebSocket, 3000);
+        }
       };
 
       ws.onerror = () => {
         connected = false;
-        updateConnectionStatus('disconnected');
+        wsRetryCount++;
+        if (wsRetryCount > 2) {
+          enableRestFallback('WebSocket connection failed — switched to HTTP REST Mode');
+        }
       };
 
       ws.onmessage = (event) => {
@@ -166,9 +191,17 @@ const App = (() => {
         }
       };
     } catch (e) {
-      updateConnectionStatus('disconnected');
-      setTimeout(connectWebSocket, 3000);
+      enableRestFallback('WebSocket unavailable — using HTTP REST Mode');
     }
+  }
+
+  function enableRestFallback(reason) {
+    useRestFallback = true;
+    connected = true; // Mark as operational via REST
+    updateConnectionStatus('connected');
+    const connText = document.querySelector('#connection-badge span');
+    if (connText) connText.textContent = 'REST: ONLINE';
+    console.log(`ℹ️ ${reason}`);
   }
 
   function sendWS(data) {
@@ -176,7 +209,51 @@ const App = (() => {
       ws.send(JSON.stringify(data));
       return true;
     }
+
+    if (useRestFallback || !connected) {
+      // Handle via REST API
+      handleRestRequest(data);
+      return true;
+    }
     return false;
+  }
+
+  async function handleRestRequest(data) {
+    if (data.type === 'get_custom_contacts') {
+      try {
+        const res = await fetch(`${API_BASE}/api/contacts`);
+        const json = await res.json();
+        renderCustomContacts(json.contacts || []);
+      } catch (e) {}
+    } else if (data.type === 'add_custom_contact') {
+      try {
+        const res = await fetch(`${API_BASE}/api/contacts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        addChatMessage('system', `➕ Added contact ${data.name}`);
+        const cRes = await fetch(`${API_BASE}/api/contacts`);
+        const cJson = await cRes.json();
+        renderCustomContacts(cJson.contacts || []);
+      } catch (e) {}
+    } else if (data.type === 'delete_custom_contact') {
+      try {
+        await fetch(`${API_BASE}/api/contacts/${data.contactId}`, { method: 'DELETE' });
+        const cRes = await fetch(`${API_BASE}/api/contacts`);
+        const cJson = await cRes.json();
+        renderCustomContacts(cJson.contacts || []);
+      } catch (e) {}
+    } else if (data.type === 'supervisor_decision') {
+      try {
+        await fetch(`${API_BASE}/api/supervisor/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (e) {}
+    }
   }
 
   // ─── Server Message Handler ────────────────────────────────────────────────
@@ -525,11 +602,73 @@ const App = (() => {
     addChatMessage('user', text);
     textarea.value = '';
 
-    // Send to server
+    if (useRestFallback) {
+      // Submit via HTTP REST POST
+      isProcessing = true;
+      setProcessingState(true);
+
+      fetch(`${API_BASE}/api/emergency`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fullText })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.incidentId) {
+          activeIncidentId = data.incidentId;
+          onIncidentStart({ rawText: fullText, timestamp: new Date().toISOString() });
+          // Poll incident status
+          pollIncidentStatus(data.incidentId);
+        }
+      })
+      .catch(err => {
+        addChatMessage('system', `❌ Error submitting emergency: ${err.message}`);
+        setProcessingState(false);
+      });
+      return;
+    }
+
+    // Send to server via WS
     const sent = sendWS({ type: 'emergency_report', text: fullText });
     if (!sent) {
       addChatMessage('system', '❌ Failed to send — check connection');
     }
+  }
+
+  async function pollIncidentStatus(incidentId) {
+    if (restPollInterval) clearInterval(restPollInterval);
+    let attempts = 0;
+
+    restPollInterval = setInterval(async () => {
+      attempts++;
+      if (attempts > 30) {
+        clearInterval(restPollInterval);
+        setProcessingState(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/incidents/${incidentId}`);
+        const json = await res.json();
+        if (json.incident && json.incident.timeline) {
+          // Process latest timeline update
+          json.incident.timeline.forEach(entry => {
+            if (!timelineEntries.find(t => t.text === entry.text)) {
+              handleServerMessage({
+                type: 'agent_update',
+                agent: entry.agent?.toLowerCase() || 'coordinator',
+                status: 'working',
+                message: entry.text,
+                timestamp: entry.time
+              });
+            }
+          });
+          if (json.incident.status === 'completed' || json.incident.status === 'done') {
+            clearInterval(restPollInterval);
+            setProcessingState(false);
+          }
+        }
+      } catch (e) {}
+    }, 1000);
   }
 
   // ─── Chat Helpers ──────────────────────────────────────────────────────────
